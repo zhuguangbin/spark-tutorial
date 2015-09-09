@@ -1,0 +1,160 @@
+---
+title: "SparkR Tutorial"
+output: ioslides_presentation
+---
+
+## SparkR
+
+R on Spark
+
+make Data Analysis easier, faster and interesting
+
+## Show a Demo
+
+a simple Demo:
+
+How are our users distributed by province ?
+
+Let's start !
+
+## Where to start ?
+
+Rstudio: a web R IDE
+
+http://hadoop.corp.mediav.com:8787/
+
+UserName: datascientist
+Password: mediav
+
+## setup SparkR env
+
+```{r}
+Sys.setenv(SPARK_HOME = '/opt/spark-1.4.1-mv')
+Sys.setenv(SPARK_YARN_QUEUE = "bi")
+library("SparkR")
+```
+
+## init SparkR
+
+```{r}
+sc = sparkR.init()
+hiveContext = sparkRHive.init(sc)
+```
+
+## First Demo - cookie distribution by province
+
+```{r}
+cookiesByProvinceid_df = sql(
+  hiveContext, "select geo_info.province as provinceid, 
+  count(cookie) as cookies from mediav_base.d_clickvalue 
+  where date='2015-07-07' and geo_info.country=1 group by geo_info.province"
+)
+cache(cookiesByProvinceid_df)
+head(cookiesByProvinceid_df,n=2)
+
+registerTempTable(cookiesByProvinceid_df,"cookiesByProvinceid")
+```
+
+## Transform provinceid to ADCODE99
+
+``` {r}
+
+# join mediav_base_location for provincename and geoid
+cookiesByProvicename_df = sql(
+  hiveContext,"select c.provinceid, c.cookies, l.en, l.geoid 
+  from cookiesByProvinceid c left join mysql.mediav_base_location l 
+  on c.provinceid=l.ID"
+)
+cache(cookiesByProvicename_df)
+cookiesByProvicename = collect(cookiesByProvicename_df)
+
+# geoid -> ADCODE99
+ADCODE99 = substr(cookiesByProvicename$geoid,5,10)
+
+# cbind, got a new data frame demonstrating num of cookies by province with province ADCODE99
+cookiesByProvicename_withADCODE99 = cbind(cookiesByProvicename,ADCODE99)
+
+```
+
+## plotting - import library
+
+```{r}
+library(maptools)
+library(ggplot2)
+library(plyr)
+gpclibPermit()
+```
+
+## plotting - load china map
+
+```{r}
+# load china map data
+china_map = readShapePoly("mapdata/bou2_4p.shp")
+# just plot it
+plot(china_map)
+```
+
+## plotting - prepare china map data
+
+```{r}
+x = china_map@data          #get location data
+xs = data.frame(x,id = seq(0:924) - 1)          # 925 locations
+china_map1 = fortify(china_map)           # fortify to data frame
+china_map_data = join(china_map1, xs, type = "full")       #join two data frame
+china_map_data$NAME = iconv(china_map_data$NAME, from = "GBK")　# convert NAME to UTF8
+```
+
+## plotting - prepare cookie distribution data on map
+
+```{r}
+cookiesByProvicename_map_data = join(china_map_data,
+                                     cookiesByProvicename_withADCODE99, 
+                                     type = "right")
+# clean up NA
+cookiesByProvicename_map_data[is.na(cookiesByProvicename_map_data)] <-  0
+```
+
+## plotting -  show sample data
+
+```{r}
+head(cookiesByProvicename_map_data, n=2)
+
+```
+
+## plotting - visualize it 
+```{r, echo=FALSE}
+# plot it, this is the final map of cookies distribution of china by province
+viz = ggplot(cookiesByProvicename_map_data, aes(
+  x = long, y = lat, group = group,fill = cookies
+)) +
+  geom_polygon(colour = "grey40") +
+  scale_fill_gradient(low = "white",high = "steelblue") + 
+  theme(
+    panel.grid = element_blank(),
+    panel.background = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title = element_blank()
+  ) +
+  labs(title = "Cookie Distribution of China By Province")
+viz
+```
+
+## How you feel about this Data Analysis Job?
+
+* Easy: you do not need build a maven job, build it, and deploy. 
+       Just write a R script, most code logic can be implemented by SQL.
+* Fast: about *10 min* overall
+* Interesting: visualize the data, easier to understand
+
+## Further more
+
+Data Visualization is important !
+
+1. intesting retargeting analysis
+
+How are users *who are interesting in MacBook* distributed by province ?
+
+2. ROI Trend 
+
+How is the ROI thrend of last month of a specific adspace ?
