@@ -10,7 +10,7 @@ if __name__ == "__main__":
     sqlContext = HiveContext(sc)
 
     # RDD is created from a list of rows
-    df = sqlContext.read.parquet("/mvad/warehouse/session/dspan/date=2015-08-01/")
+    df = sqlContext.read.parquet("/mvad/warehouse/session/dspan/date=2015-09-01/")
     df.registerTempTable("sessionlog")
     for table in sqlContext.tableNames():
         print table

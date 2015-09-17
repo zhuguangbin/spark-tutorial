@@ -11,7 +11,7 @@ hiveContext = sparkRHive.init(sc)
 
 # count cookies by province
 cookiesByProvinceid_df = sql(
-  hiveContext, "select geo_info.province as provinceid, count(cookie) as cookies from mediav_base.d_clickvalue where date='2015-07-07' and geo_info.country=1 group by geo_info.province"
+  hiveContext, "select geo_info.province as provinceid, count(cookie) as cookies from mediav_base.d_clickvalue where date='2015-09-01' and geo_info.country=1 group by geo_info.province"
 )
 
 cache(cookiesByProvinceid_df)

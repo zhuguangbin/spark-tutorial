@@ -17,7 +17,7 @@ object JDBCDemo {
     props.put("user","hadoop")
     props.put("password","RNymee2527#")
 
-    val jdbcDF = sqlContext.read.jdbc("jdbc:mysql://st1dg:3306/hadoop", "sparksql_history", props)
+    val jdbcDF = sqlContext.read.jdbc("jdbc:mysql://adm1dg:3306/hadoop", "sparksql_history", props)
     jdbcDF.registerTempTable("sparksql_history")
     sqlContext.tableNames.foreach(println)
     jdbcDF.printSchema()

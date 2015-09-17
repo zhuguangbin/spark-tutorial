@@ -34,9 +34,9 @@ object SessionLogParquetDemo {
     import sqlContext.implicits._
 
     // Create a DataFrame from Parquet files
-    val df = sqlContext.read.parquet("/mvad/warehouse/session/dspan/date=2015-05-01/")
+    val df = sqlContext.read.parquet("/mvad/warehouse/session/dspan/date=2015-09-01/")
     // Your can alsoCreate a DataFrame from data sources
-    //    val df = sqlContext.load("/mvad/warehouse/session/dspan/date=2015-05-01/","parquet")
+    //    val df = sqlContext.load("/mvad/warehouse/session/dspan/date=2015-09-01/","parquet")
     df.registerTempTable("sessionlog")
     sqlContext.tableNames.foreach(println)
     df.printSchema()
