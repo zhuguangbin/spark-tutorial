@@ -33,6 +33,12 @@
       <groupId>com.mediav</groupId>
       <artifactId>mv-log-format</artifactId>
       <version>r15593</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.thrift</groupId>
+          <artifactId>libthrift</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.spark</groupId>
