@@ -20,6 +20,7 @@ object SessionLogParquetDemo {
       for (i <- 0 until cookiebytes.length - 1) yield
       ((cookiebytes(i).toByte & 0xf0) >>> 4).toString + ((cookiebytes(i).toByte & 0x0f)).toString
       ).mkString
+    val firstPart = cookiebytes map { c => (c.toByte & 0xf0 + c.toByte & 0x0f) toString } mkString
     val lastPart = ((cookiebytes(11).toByte & 0xFF) >>> 4)
 
     firstPart + lastPart
